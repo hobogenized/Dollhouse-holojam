@@ -31,7 +31,7 @@ namespace Holojam.Network {
 			sendThread = new HolojamSendThread(BLACK_BOX_SERVER_PORT);
 			receiveThread = new HolojamRecieveThread(BLACK_BOX_CLIENT_PORT);
 
-			//sendThread.Start();
+			sendThread.Start();
 			receiveThread.Start();
 
 			StartCoroutine(DisplayPacketsPerSecond());
@@ -79,10 +79,6 @@ namespace Holojam.Network {
 						"HolojamNetwork: Sent Packets - "+sentPacketsPerSecond+
 						" Received Packets - "+receivedPacketsPerSecond
 					);
-					VRConsoleDebug.println (
-						"HolojamNetwork: Sent Packets - " + sentPacketsPerSecond +
-						" Received Packets - " + receivedPacketsPerSecond
-					);
 				}
 			}
 		}
@@ -90,6 +86,11 @@ namespace Holojam.Network {
 		public bool IsTracked(string label) {
 			HolojamObject o;
 			return receiveThread.GetObject(label, out o);
+		}
+
+		void OnDestroy () {
+			sendThread.Stop ();
+			receiveThread.Stop ();
 		}
 	}
 
@@ -260,23 +261,21 @@ namespace Holojam.Network {
 			}
 
 			while (isRunning) {
-				System.Threading.Thread.Sleep(100);
+				System.Threading.Thread.Sleep(10);
 				if (managedObjects.Values.Count == 0)
 					continue;
-
 				lock (lockObject) {
 
 					update = new update_protocol_v3.Update();
-					update.label = "SendThread - " + SystemInfo.deviceUniqueIdentifier;
+					update.label = "SendData";
 					update.mod_version = lastLoadedFrame;
 					update.lhs_frame = false;
 					lastLoadedFrame++;
-
 					foreach (KeyValuePair<string, HolojamObject> entry in managedObjects) {
 						LiveObject o = entry.Value.ToLiveObject();
 						update.live_objects.Add(o);
-					}
 
+					}
 					using (MemoryStream stream = new MemoryStream()) {
 						packetCount++;
 						Serializer.Serialize<Update>(stream, update);
@@ -293,9 +292,9 @@ namespace Holojam.Network {
 		}
 
 		public void UpdateManagedObjects(HolojamView[] views) {
-			managedObjects.Clear();
-
 			lock (lockObject) {
+				managedObjects.Clear();
+
 				foreach (HolojamView view in views) {
 					HolojamObject o = HolojamObject.FromView(view);
 					managedObjects[o.label] = o;

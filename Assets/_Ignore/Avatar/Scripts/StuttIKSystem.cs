@@ -80,10 +80,10 @@ namespace Holojam.Avatar {
 
              for (int i = 0; i < 5; i++) {
                   GameObject go = objs[i];
-                  TrackedObject trackedObject = go.GetComponent<TrackedObject>();
+                  Trackable trackedObject = go.GetComponent<Trackable>();
                   if (trackedObject == null)
-                       trackedObject = go.AddComponent<TrackedObject>();
-                  trackedObject.liveObjectTag = tags[i];
+                       trackedObject = go.AddComponent<Trackable>();
+			   trackedObject.trackingTag = tags[i];
              }
         }
     }

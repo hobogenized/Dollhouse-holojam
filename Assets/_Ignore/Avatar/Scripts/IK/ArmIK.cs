@@ -15,6 +15,7 @@ namespace Holojam.Avatar.IK {
 
         public float startToMidDistance = 0.18f;
         public float midToEndDistance = 0.18f;
+	   public float scale = 1.0f;
 
         private Vector3 C, D;
         private float cc, x, y;
@@ -60,7 +61,8 @@ namespace Holojam.Avatar.IK {
             y = Mathf.Sqrt(Mathf.Max(0, a * a - cc * x * x) / Vector3.Dot(D, D));
             D = x * C + y * D;
 
-            midEffector.position = startEffector.rotation * D  + startEffector.position;
+		  // TODO: More stable fix
+            midEffector.position = startEffector.rotation * D * scale  + startEffector.position;
         }
 
         protected Vector3 Hint(Vector3 endEffectorPosition) {

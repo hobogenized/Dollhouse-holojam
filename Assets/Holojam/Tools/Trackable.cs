@@ -38,8 +38,8 @@ namespace Holojam{
 		protected virtual void UpdateTracking(){
 			//By default, assigns position and rotation injectively
 			if(view.IsTracked){
-				transform.position=trackedPosition;
-				transform.rotation=trackedRotation;
+				transform.localPosition=trackedPosition;
+				transform.localRotation=trackedRotation;
 			}
 			//Untracked maintains last known position and rotation
 		}
