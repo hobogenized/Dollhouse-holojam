@@ -26,13 +26,16 @@ namespace Holojam.Network {
 
 		private HolojamSendThread sendThread;
 		private HolojamRecieveThread receiveThread;
+		private HolojamRecieveThread receiveThread2;
 
 		void Start() {
 			sendThread = new HolojamSendThread(BLACK_BOX_SERVER_PORT);
 			receiveThread = new HolojamRecieveThread(BLACK_BOX_CLIENT_PORT);
+			receiveThread2 = new HolojamRecieveThread(BLACK_BOX_CLIENT_PORT+1);
 
 			sendThread.Start();
 			receiveThread.Start();
+			receiveThread2.Start();
 
 			StartCoroutine(DisplayPacketsPerSecond());
 		}
@@ -91,6 +94,7 @@ namespace Holojam.Network {
 		void OnDestroy () {
 			sendThread.Stop ();
 			receiveThread.Stop ();
+			receiveThread2.Stop ();
 		}
 	}
 
@@ -216,10 +220,7 @@ namespace Holojam.Network {
 							ho.bits = or.button_bits;
 
 							//Get blob if it's there. Inefficient
-							if (or.extra_data.Count > 0) {
-								ExtraData data = or.extra_data[0];
-								ho.blob = data.string_val;
-							}
+							ho.blob = or.extra_data;
 						}
 					}
 				}
@@ -272,7 +273,7 @@ namespace Holojam.Network {
 					update.lhs_frame = false;
 					lastLoadedFrame++;
 					foreach (KeyValuePair<string, HolojamObject> entry in managedObjects) {
-						LiveObject o = entry.Value.ToLiveObject();
+						LiveObject o = entry.Value.ToLiveObject();	
 						update.live_objects.Add(o);
 
 					}
@@ -333,11 +334,7 @@ namespace Holojam.Network {
 			o.button_bits = bits;
 
 			if (!string.IsNullOrEmpty(blob)) {
-				ExtraData data = new ExtraData();
-				data.label = "blob";
-				data.string_val = blob;
-
-				o.extra_data.Add(data);
+				o.extra_data = blob;
 			}
 
 			return o;
